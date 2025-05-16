@@ -54,7 +54,7 @@ module Domain =
                 let toPlace = CityMap.Places[toPlace.Id]
                 let newFromPlace = {fromPlace with Neighbours = (toPlace.Id, {Length = length; Type = routeType}) :: fromPlace.Neighbours}
                 let newToPlace = {toPlace with Neighbours = (fromPlace.Id, {Length = length; Type = routeType}) :: toPlace.Neighbours}
-                CityMap <- {CityMap with Places = CityMap.Places.Add(fromPlace.Id, newFromPlace).Add(toPlace.Id, newToPlace)}
+                CityMap <- {CityMap with Places = CityMap.Places.Add(fromPlace.Id, newFromPlace).Add(toPlace.Id, newToPlace); NumOfRoutes = CityMap.NumOfRoutes + 1}
         member this.connect2Directions routeType length place1 place2 =
             this.ConnectPlaces routeType length place1 place2 
             this.ConnectPlaces routeType length place2 place1
