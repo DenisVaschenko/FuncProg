@@ -1,5 +1,4 @@
-using static CityFsLibrary.Domain;
-using static CityFsLibrary.KyivExample;
+using static CityFsLibrary.SaveCity;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,7 +14,7 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOption.UseHttps("E:\\GitHub\\WebLab3\\WebLab3\\localhost.p12", "changeit");
     });
 });
-builder.Services.AddSingleton(generateKyivCity());
+builder.Services.AddSingleton(getSavedCity());
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

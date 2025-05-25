@@ -1,6 +1,8 @@
 using CityFsLibrary;
 using Microsoft.AspNetCore.Mvc;
 using static CityFsLibrary.Domain;
+using static CityFsLibrary.SaveCity;
+using static CityFsLibrary.CityAnalyzer;
 
 namespace CityApi.Controllers
 {
@@ -12,6 +14,12 @@ namespace CityApi.Controllers
         public CityController(City city)
         {
             _city = city;
+            Task.Run(() =>
+            {
+                Thread.Sleep(10000);
+                Console.WriteLine("Saving city...");
+                saveCity(city);
+            });
         }
         [HttpGet("places")]
         public ActionResult<IEnumerable<string>> GetPlaces()
@@ -44,6 +52,12 @@ namespace CityApi.Controllers
                 result.Add(place.Name + " length: " +route.Length);
             }
 
+            return Ok(result);
+        }
+        [HttpGet("analyze")]
+        public async Task<IActionResult> AnalyzeCity()
+        {
+            var result = await Analyze();
             return Ok(result);
         }
         [HttpPost("place")]
