@@ -11,7 +11,7 @@ module CityAnalyzer =
     }
     type Config = JsonProvider<"config.json">
     type CityData = JsonProvider<"data/cityExample.json">
-    let Analyze () = task{
+    let Analyze () = task {
         let filePath = Config.Load("config.json").CityFilePath
         let! cityData = CityData.AsyncLoad(filePath)
         let totalPlaces = cityData.Places |> Seq.length

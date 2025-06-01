@@ -4,7 +4,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.WebHost.ConfigureKestrel(options =>
@@ -14,6 +13,7 @@ builder.WebHost.ConfigureKestrel(options =>
         listenOption.UseHttps("E:\\GitHub\\WebLab3\\WebLab3\\localhost.p12", "changeit");
     });
 });
+
 builder.Services.AddSingleton(getSavedCity());
 var app = builder.Build();
 

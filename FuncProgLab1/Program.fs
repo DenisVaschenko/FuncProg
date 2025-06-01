@@ -23,14 +23,13 @@ module Domain =
                 member this.Coordinates = this.Location
 
     type defaultMap<'T> = Map<Id, 'T>
-    
-    type CityMap = {Name: string; Places: defaultMap<Place>; NumOfRoutes: int}
-    type City(cityMap: CityMap) =
-        let mutable CityMap = cityMap
-        let findDistance (fromPlace : ILocatable) (toPlace : ILocatable) =
+    let findDistance (fromPlace : ILocatable) (toPlace : ILocatable) =
             let dx = toPlace.Coordinates.X - fromPlace.Coordinates.X
             let dy = toPlace.Coordinates.Y - fromPlace.Coordinates.Y
             Math.Sqrt(float (dx * dx + dy * dy))
+    type CityMap = {Name: string; Places: defaultMap<Place>; NumOfRoutes: int}
+    type City(cityMap: CityMap) =
+        let mutable CityMap = cityMap
         member _.Id = generateId ()
         member _.getCityMap ()= {Name = CityMap.Name; Places = CityMap.Places; NumOfRoutes = CityMap.NumOfRoutes}
         new(name: string) =
@@ -38,7 +37,7 @@ module Domain =
         member _.addPlace (place: Place) =
             CityMap <- {CityMap with Places = CityMap.Places.Add(place.Id, place)}
         member _.findPlaceById (id: Id) =
-            CityMap.Places[id]
+            CityMap.Places.TryFind(id)
         member _.findPlaceByName (name: string) =
             CityMap.Places.Values |> Seq.tryFind(fun place -> place.Name = name)
         member _.getPlaces () =
@@ -81,17 +80,23 @@ module Domain =
                     | 0 -> None
                     | _ ->
                         let path, currentLength = queue.Dequeue()
-                        let currentPlace =path.Head |> fst |> this.findPlaceById 
+                        let currentPlace =path.Head |> fst |> this.findPlaceById
                         match currentPlace with
-                            | place when place.Id = toPlace.Id -> List.rev path |> Some
-                            | place when seen.Contains(place.Id) -> loop ()
-                            | _ ->
-                                seen.Add(currentPlace.Id) |> ignore
-                                currentPlace.Neighbours
+                            | None -> 
+                                failwithf "Place with ID %s not found in the city." (path.Head |> fst)
+                            | Some place when place.Id = toPlace.Id -> List.rev path |> Some
+                            | Some place when seen.Contains(place.Id) -> loop ()
+                            | Some place ->
+                                seen.Add(place.Id) |> ignore
+                                place.Neighbours
                                 |> Seq.filter(fun route -> not (seen.Contains(route.PlaceId)))
                                 |> Seq.iter(fun route ->
-                                    queue.Enqueue(((route.PlaceId, route) :: path, currentLength + route.Length), 
-                                    currentLength + route.Length + (route.PlaceId |> this.findPlaceById |> destDistance) )
+                                    match route.PlaceId |> this.findPlaceById with
+                                        | None -> failwithf "Place with ID %s not found in the city." route.PlaceId
+                                        | Some newPlace ->
+                                            queue.Enqueue(((route.PlaceId, route) :: path, currentLength + route.Length), 
+                                            currentLength + route.Length + (newPlace |> destDistance) )
+                                    
                                 )
                                 loop () 
             loop ()
@@ -166,5 +171,7 @@ module KyivExample =
             city
     [<EntryPoint>]
     let main argv =
+        let kCity = generateKyivCity ()
+        printf "%A" (kCity.findPlaceByName("Арсенальна").Value)
         //saveCity (generateKyivCity ())
         0

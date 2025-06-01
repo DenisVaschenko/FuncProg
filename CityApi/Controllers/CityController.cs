@@ -49,7 +49,9 @@ namespace CityApi.Controllers
             foreach (var (placeId, route) in path)
             {
                 var place = _city.findPlaceById(placeId);
-                result.Add(place.Name + " length: " +route.Length);
+                if (place == null)
+                    return NotFound("Place not found in path");
+                result.Add(place.Value.Name + " length: " +route.Length);
             }
 
             return Ok(result);
@@ -94,9 +96,9 @@ namespace CityApi.Controllers
                 _city.ConnectPlaces(routeType, request.Length, fromPlace, toPlace);
                 return Ok("Places connected successfully");
             }
-            catch (System.Exception ex)
+            catch (System.Exception exc)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(exc.Message);
             }
         }
         public class CreatePlaceRequest
